@@ -42,6 +42,7 @@ export const Camera = React.forwardRef<unknown, CameraProps>(
     const mounted = useRef(false);
 
     useEffect(() => {
+      // Used to prevent memory leaks and control async operations. Works in tangent with other UseEffects
       mounted.current = true;
 
       return () => {
@@ -73,6 +74,10 @@ export const Camera = React.forwardRef<unknown, CameraProps>(
     useEffect(() => {
       switchTorch(torch);
     }, [torch]);
+
+    //useImperativeHandle allows parent components to interact with the defined functions/method (takePhoto in this case)
+    // This means that when the component (Camera in this case line 13) is ref'd, the parent component that ref'd  it can trigger the method/function defined
+    // inside the useImperativeHandle. Refer to the explanation of refs in types.ts to understand more.
 
     useImperativeHandle(ref, () => ({
       takePhoto: (type?: 'base64url' | 'imgData') => {
