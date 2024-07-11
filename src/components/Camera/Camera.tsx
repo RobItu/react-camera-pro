@@ -84,6 +84,7 @@ export const Camera = React.forwardRef<unknown, CameraProps>(
         if (numberOfCameras < 1) {
           throw new Error(errorMessages.noCameraAccessible);
         }
+        console.log("OMG IT WORKS!")
         //Checks to see if canvas is null. When a ref object is made, it has a current property. It was initially set
         // to null in line 32. When the object renders/mounts the current status is changed to a value.
         if (canvas?.current) {
@@ -127,9 +128,11 @@ export const Camera = React.forwardRef<unknown, CameraProps>(
           switch (type) {
             case 'imgData':
               imgData = context.current?.getImageData(0, 0, sW, sH);
+              console.log("img data!")
               break;
             default: /* base64url */
               imgData = canvas.current.toDataURL('image/jpeg');
+              console.log("img data2!")
               break;
           }
 

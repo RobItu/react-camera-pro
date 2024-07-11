@@ -212,6 +212,7 @@ const App = () => {
               const photo = camera.current.takePhoto();
               console.log(photo);
               setImage(photo as string);
+              const base64 = photo;
             }
           }}
         />
