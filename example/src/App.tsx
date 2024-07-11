@@ -201,11 +201,13 @@ const App = () => {
         <ImagePreview
           image={image}
           onClick={() => {
+            console.log('Image preview clicked'); // This line adds the console message
             setShowImage(!showImage);
           }}
         />
         <TakePhotoButton
           onClick={() => {
+            console.log('Take Photo clicked'); // This line adds the console message
             if (camera.current) {
               const photo = camera.current.takePhoto();
               console.log(photo);

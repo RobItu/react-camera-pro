@@ -84,18 +84,23 @@ export const Camera = React.forwardRef<unknown, CameraProps>(
         if (numberOfCameras < 1) {
           throw new Error(errorMessages.noCameraAccessible);
         }
-
+        //Checks to see if canvas is null. When a ref object is made, it has a current property. It was initially set
+        // to null in line 32. When the object renders/mounts the current status is changed to a value.
         if (canvas?.current) {
+          //player is the actual video display player
           const playerWidth = player?.current?.videoWidth || 1280;
           const playerHeight = player?.current?.videoHeight || 720;
           const playerAR = playerWidth / playerHeight;
-
+          // Canvas is the div that holds the player. AR stands for Aspect Ratio
           const canvasWidth = container?.current?.offsetWidth || 1280;
           const canvasHeight = container?.current?.offsetHeight || 1280;
           const canvasAR = canvasWidth / canvasHeight;
 
           let sX, sY, sW, sH, imgData;
 
+          //The code snippet is preparing to draw a portion of a video player onto a canvas. It begins by comparing the aspect ratios of the video player and the canvas container to decide how to best fit the video within the canvas. Depending on whether the video player aspect ratio is greater than the canvas aspect ratio or not, it calculates different values for the source dimensions (sW, sH) and source coordinates (sX, sY). These values determine which part of the video to draw and how to scale it.
+
+          //Once the values are set, it adjusts the canvas size to match the calculated width and height. It ensures that the 2D drawing context of the canvas is initialized. Finally, it draws the calculated portion of the video onto the canvas, effectively copying part of the video frame to the canvas.
           if (playerAR > canvasAR) {
             sH = playerHeight;
             sW = playerHeight * canvasAR;
@@ -114,7 +119,7 @@ export const Camera = React.forwardRef<unknown, CameraProps>(
           if (!context.current) {
             context.current = canvas.current.getContext('2d', { willReadFrequently: true });
           }
-
+          // This draws the frame of the video player onto the canvas. Kind of like taking a screenshot.
           if (context.current && player?.current) {
             context.current.drawImage(player.current, sX, sY, sW, sH, 0, 0, sW, sH);
           }
