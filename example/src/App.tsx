@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
+import EXIF from 'exif-js'; // Import the EXIF library
 
 import { Camera, CameraType } from './Camera';
 
@@ -142,6 +143,7 @@ const FullScreenImagePreview = styled.div<{ image: string | null }>`
 `;
 
 const App = () => {
+  const [base64String, setBase64String] = useState<string | null>(null);
   const [numberOfCameras, setNumberOfCameras] = useState(0);
   const [image, setImage] = useState<string | null>(null);
   const [showImage, setShowImage] = useState<boolean>(false);
@@ -157,6 +159,16 @@ const App = () => {
       setDevices(videoDevices);
     })();
   });
+
+  const base64ToArrayBuffer = (base64: string) => {
+    const binaryString = window.atob(base64.split(',')[1]);
+    const len = binaryString.length;
+    const bytes = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
+      bytes[i] = binaryString.charCodeAt(i);
+    }
+    return bytes.buffer;
+  };
 
   return (
     <Wrapper>
@@ -212,10 +224,30 @@ const App = () => {
               const photo = camera.current.takePhoto();
               console.log(photo);
               setImage(photo as string);
-              const base64 = photo;
+              const base64URL = image;
+              console.log('before first if');
+              console.log(typeof base64URL);
+              if (typeof base64URL === 'string') {
+                console.log('entering first if..');
+                if (typeof base64URL === 'string') {
+                  // Extracting metadata
+                  console.log('entered base64URL IF');
+                  const arrayBuffer = base64ToArrayBuffer(base64URL);
+
+                  const initiatingBlob = new Blob([arrayBuffer]);
+                  const stringBlob = initiatingBlob as unknown as string;
+
+                  EXIF.getData(stringBlob, function () {
+                    const metadata = EXIF.getAllTags(stringBlob);
+                    console.log('metadata:');
+                    console.log(metadata);
+                  });
+                }
+              }
             }
           }}
         />
+
         {camera.current?.torchSupported && (
           <TorchButton
             className={torchToggled ? 'toggled' : ''}
