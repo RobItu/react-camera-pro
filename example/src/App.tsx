@@ -143,7 +143,7 @@ const FullScreenImagePreview = styled.div<{ image: string | null }>`
 `;
 
 const App = () => {
-  const [base64String, setBase64String] = useState<string | null>(null);
+  const [metadata, setMetadata] = useState<any>(null);
   const [numberOfCameras, setNumberOfCameras] = useState(0);
   const [image, setImage] = useState<string | null>(null);
   const [showImage, setShowImage] = useState<boolean>(false);
@@ -241,6 +241,7 @@ const App = () => {
                     const metadata = EXIF.getAllTags(stringBlob);
                     console.log('metadata:');
                     console.log(metadata);
+                    setMetadata(metadata); // Update the state with the extracted metadata
                   });
                 }
               }
@@ -267,6 +268,16 @@ const App = () => {
             }
           }}
         />
+
+        <div>
+          {image && <img src={image} alt="Taken photo" />}
+          {metadata && (
+            <div>
+              <h3>Metadata</h3>
+              <pre>{JSON.stringify(metadata, null, 2)}</pre>
+            </div>
+          )}
+        </div>
       </Control>
     </Wrapper>
   );
