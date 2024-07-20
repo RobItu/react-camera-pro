@@ -143,6 +143,8 @@ const FullScreenImagePreview = styled.div<{ image: string | null }>`
 `;
 
 const App = () => {
+  const [location, setLocation] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
   const [metadata, setMetadata] = useState<any>(null);
   const [numberOfCameras, setNumberOfCameras] = useState(0);
   const [image, setImage] = useState<string | null>(null);
@@ -152,6 +154,7 @@ const App = () => {
   const [activeDeviceId, setActiveDeviceId] = useState<string | undefined>(undefined);
   const [torchToggled, setTorchToggled] = useState<boolean>(false);
 
+  // Get mediaDevices
   useEffect(() => {
     (async () => {
       const devices = await navigator.mediaDevices.enumerateDevices();
@@ -159,6 +162,31 @@ const App = () => {
       setDevices(videoDevices);
     })();
   });
+
+  // Get Location Tags
+  useEffect(() => {
+    const getLocation = async () => {
+      if (!navigator.geolocation) {
+        setError('Geolocation is not supported by your browser');
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const loc = {
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+          };
+          setLocation(loc);
+        },
+        (error) => {
+          setError(`Error: ${error.message}`);
+        },
+      );
+    };
+
+    getLocation();
+  }, []);
 
   const base64ToArrayBuffer = (base64: string) => {
     const binaryString = window.atob(base64.split(',')[1]);
@@ -220,30 +248,30 @@ const App = () => {
         <TakePhotoButton
           onClick={() => {
             console.log('Take Photo clicked'); // This line adds the console message
+            console.log('lat/long coordinates: ', location);
             if (camera.current) {
               const photo = camera.current.takePhoto();
               console.log(photo);
               setImage(photo as string);
               const base64URL = image;
-              console.log('before first if');
+              console.log('before first if...');
               console.log(typeof base64URL);
               if (typeof base64URL === 'string') {
-                console.log('entering first if..');
-                if (typeof base64URL === 'string') {
-                  // Extracting metadata
-                  console.log('entered base64URL IF');
-                  const arrayBuffer = base64ToArrayBuffer(base64URL);
+                console.log('entered first if');
+                // Extracting metadata
 
-                  const initiatingBlob = new Blob([arrayBuffer]);
-                  const stringBlob = initiatingBlob as unknown as string;
+                // base64ToArrayBuffer must pass base64URL that has the geolocation tags injected in metadata
+                const arrayBuffer = base64ToArrayBuffer(base64URL);
 
-                  EXIF.getData(stringBlob, function () {
-                    const metadata = EXIF.getAllTags(stringBlob);
-                    console.log('metadata:');
-                    console.log(metadata);
-                    setMetadata(metadata); // Update the state with the extracted metadata
-                  });
-                }
+                const initiatingBlob = new Blob([arrayBuffer]);
+                const stringBlob = initiatingBlob as unknown as string;
+
+                EXIF.getData(stringBlob, function () {
+                  const metadata = EXIF.getAllTags(initiatingBlob);
+                  console.log('metadata:');
+                  console.log(metadata);
+                  setMetadata(metadata); // Update the state with the extracted metadata
+                });
               }
             }
           }}
